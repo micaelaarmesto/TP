@@ -1,0 +1,37 @@
+class User:
+    def __init__(self,name,password,age = None,email= None,country=None,fav_team=None,fav_player=None):
+        self.name = name
+        self.password = password
+        self.age = age
+        self.email = email
+        self.country = country
+        self.fav_teams = fav_team
+        self.fav_player = fav_player
+class Login(User):
+    def __init__(self,name,password):
+        self.name = name
+        self.password = password
+    def login(self):
+        success = False
+        database_loging = cursor.execute("SELECT * FROM users")
+        for x in database_loging:
+            if x[1] == self.name and x[2] == self.password:
+                print("Logged in")
+                break
+            else:
+                print("User or password not recognize")
+class Register(User):
+    def __init__(self,name,password,age,email,country,fav_team,fav_player):
+        self.name = name
+        self.password  =password
+        self.age = age
+        self.email = email
+        self.country = country
+        self.fav_teams = fav_team
+        self.fav_player = fav_player
+    def register(self):
+        print("Registered")
+        cursor.execute("INSERT INTO users(name,password,age,email,country,fav_team,fav_player) VALUES (?,?,?,?,?,?,?)",
+                       (self.name,self.password,self.age,self.email,self.country,self.fav_teams,self.fav_player))
+        connect.commit()
+        connect.close()
