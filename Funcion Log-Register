@@ -1,0 +1,23 @@
+def intro_programa():
+    print('Welcome to NBA stats')
+    print('1-Login\n2-Register')
+    choice_login = int(input())
+    def intro_programa_login():
+        x1 = input('Name: ')
+        x2 = input('Password: ')
+        U1 = User(x1, x2)
+        L1 = Login(x1, x2).login()
+    def intro_programa_register():
+        x1 = input('Name: ')
+        x2 = input('Password: ')
+        x3 = input('Age: ')
+        x4 = input('Email: ')
+        x5 = input('Country: ')
+        x6 = input('Fav_team: ')
+        x7 = input('Fav_player: ')
+        U1 = User(x1, x2, x3, x4, x5, x6, x7)
+        R1 = Register(x1, x2, x3, x4, x5, x6, x7).register()
+    if choice_login == 1:
+        intro_programa_login()
+    elif choice_login == 2:
+        intro_programa_register()
