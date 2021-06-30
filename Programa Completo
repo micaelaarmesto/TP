@@ -1,0 +1,404 @@
+import sqlite3
+import pandas as pd
+import requests as rq
+connect = sqlite3.connect('NBA tp.db')
+cursor = connect.cursor()
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', None)
+
+
+# FALTA: API PROPIA - SCRIPTS? - EXEPCIONES(FACIL) - ANALISIS DE DATOS(LOS USAMOS EN NUESTROS USUARIOS) - LECTURA DE CSV(HAY QUE CREAR UNA FUNCION QUE LEA DE UN ARCHIVO CSV NUESTROS USARIOS)
+id_1 = 0
+id_2 = 0
+partido = 0
+def intro_programa():
+    print('Welcome to NBA stats')
+    print('1-Login\n2-Register')
+    choice_login = int(input())
+    def intro_programa_login():
+        x1 = input('Name: ')
+        x2 = input('Password: ')
+        U1 = User(x1, x2)
+        L1 = Login(x1, x2).login()
+    def intro_programa_register():
+        x1 = input('Name: ')
+        x2 = input('Password: ')
+        x3 = input('Age: ')
+        x4 = input('Email: ')
+        x5 = input('Country: ')
+        x6 = input('Fav_team: ')
+        x7 = input('Fav_player: ')
+        U1 = User(x1, x2, x3, x4, x5, x6, x7)
+        R1 = Register(x1, x2, x3, x4, x5, x6, x7).register()
+    if choice_login == 1:
+        intro_programa_login()
+    elif choice_login == 2:
+        intro_programa_register()
+
+def elegir_estadistica():
+    print('Choose type of stadistic you want to see:\n'
+          '1-Team\n'
+          '2-Player\n'
+          '3-PlayByPlay\n')
+    x = int(input())
+    if x == 1:
+        #ID1
+        from nba_api.stats.static import teams
+        team_x = teams.get_teams()
+        for team in team_x:
+            print(team['full_name'])
+
+        team_chosen = str(input('Please insert the team name: '))
+        database_teams_bio_select = cursor.execute("SELECT * FROM nba_teams_bio")
+        for x in database_teams_bio_select:
+            if x[1] == team_chosen:
+                global id_1
+                id_1 = x[0]
+                print(id_1)
+
+        #ELIGE LA ESTADISTICA TEAM
+        print('Choose type of team stadistic:\n'
+              '1-Biography\n'
+              '2-Roster\n'
+              '3-Defensive\n'
+              '4-Offensive\n')
+        y = int(input())
+        T1 = Team(id_1)
+        if y == 1:
+            T1.bio_team()
+        elif y == 2:
+            T1.roster_stats()
+        elif y == 3:
+            T1.defensive_stats()
+        elif y == 4:
+            T1.offensive_stats()
+
+    elif x == 2:
+        from nba_api.stats.static import teams
+        from nba_api.stats.static import players
+        team_x = teams.get_teams()
+        for team in team_x:
+            print(team['full_name'])
+
+        team_chosen = str(input('Please insert the team name: '))
+        database_teams_bio_select = cursor.execute("SELECT * FROM nba_teams_bio")
+        for x in database_teams_bio_select:
+            if x[1] == team_chosen:
+                id_1 = x[0]
+                print(id_1)
+        from nba_api.stats.endpoints import commonteamroster
+        roster = commonteamroster.CommonTeamRoster(team_id=id_1, season='2019-20', league_id_nullable='00')
+        roster_df = roster.get_data_frames()[0]
+        inividual_player = roster_df['PLAYER']
+        print(inividual_player)
+        print('Insert player name: ')
+        choosen_player_name = str(input())
+        sql_sentence_p = ("SELECT * FROM players")
+        player_sql_sentence = cursor.execute(sql_sentence_p)
+        connect.commit()
+        for p in player_sql_sentence:
+            if p[1] == choosen_player_name:
+                global player_choosen_id
+                player_choosen_id = p[0]
+                print(player_choosen_id)
+        print('Choose typer of player stadistic:\n'
+              '1-Biography\n'
+              '2-Carrer high\n'
+              '3-shooting\n'
+              '4-defending\n'
+              '5-rebound\n'
+              '6-passing\n')
+        player_stat = int(input())
+        P1 = Player(id_player=player_choosen_id)
+        if player_stat == 1:
+            P1.common_player_info()
+        if player_stat == 2:
+            P1.career_high()
+        if player_stat == 3:
+            P1.player_shooting()
+        if player_stat == 4:
+            P1.defending_shots()
+        if player_stat == 5:
+            P1.rebound()
+        if player_stat == 6:
+            P1.passing()
+
+
+
+    elif x == 3:
+        #ID1
+        from nba_api.stats.static import teams
+        team_x = teams.get_teams()
+        for team in team_x:
+            print(team['full_name'])
+
+        team_chosen = str(input('Please insert the team name: '))
+        database_teams_bio_select = cursor.execute("SELECT * FROM nba_teams_bio")
+        for x in database_teams_bio_select:
+            if x[1] == team_chosen:
+                id_1 = x[0]
+                print(id_1)
+
+        #ID2
+        team_y = teams.get_teams()
+        for team in team_y:
+            print(team['full_name'])
+
+        team_chosen_2 = str(input('Please insert the team name: '))
+        database_teams_bio_select_2 = cursor.execute("SELECT * FROM nba_teams_bio")
+        for x in database_teams_bio_select_2:
+            if x[1] == team_chosen_2:
+                global id_2
+                id_2 = x[0]
+                print(id_2)
+        #GAMEID
+        from nba_api.stats.endpoints import leaguegamefinder
+        league_game_finder = leaguegamefinder.LeagueGameFinder(season_nullable='2019-20',
+                                                               league_id_nullable='00',
+                                                               team_id_nullable='1610612738',
+                                                               vs_team_id_nullable='1610612737')
+        league_game_finder_df = league_game_finder.get_dict()
+        games_dic = (league_game_finder_df['resultSets'])
+
+        for game in games_dic:
+            # print(game)
+            each_game = game['rowSet']
+            # print(each_game)
+            for individual_game in each_game:
+                print(individual_game[0:7])
+            print('choose game, insert the date:')
+            local_game = str(input())
+            global partido
+            for x in each_game:
+                if local_game == x[5]:
+                    partido = x[4]
+                    print(partido)
+
+        # ELEGIR ESTADISTICA
+        print('Choose typer of team stadistic:\n'
+              '1-Matchup\n'
+              '2-Defensive\n'
+              '3-Scoring\n'
+              '4-Summary\n')
+        y = int(input())
+        Play_1 = PlayByPlay(id_team=id_1,opponent_team=id_2,g_id=partido)
+        if y == 1:
+            Play_1.box_score_m()
+        if y == 2:
+            Play_1.box_score_defensive()
+        if y == 3:
+            Play_1.box_score_scoring()
+        if y == 4:
+            Play_1.box_score_summary()
+
+
+class User:
+    def __init__(self,name,password,age = None,email= None,country=None,fav_team=None,fav_player=None):
+        self.name = name
+        self.password = password
+        self.age = age
+        self.email = email
+        self.country = country
+        self.fav_teams = fav_team
+        self.fav_player = fav_player
+class Login(User):
+    def __init__(self,name,password):
+        self.name = name
+        self.password = password
+    def login(self):
+        success = False
+        database_loging = cursor.execute("SELECT * FROM users")
+        for x in database_loging:
+            if x[1] == self.name and x[2] == self.password:
+                print("Logged in")
+                break
+            else:
+                print("User or password not recognize")
+class Register(User):
+    def __init__(self,name,password,age,email,country,fav_team,fav_player):
+        self.name = name
+        self.password  =password
+        self.age = age
+        self.email = email
+        self.country = country
+        self.fav_teams = fav_team
+        self.fav_player = fav_player
+    def register(self):
+        print("Registered")
+        cursor.execute("INSERT INTO users(name,password,age,email,country,fav_team,fav_player) VALUES (?,?,?,?,?,?,?)",
+                       (self.name,self.password,self.age,self.email,self.country,self.fav_teams,self.fav_player))
+        connect.commit()
+        connect.close()
+#CLASE TEAM PARA SACAR ESTADISTICAS DE EQUIPOS.TERMINADO!
+class Team:
+    def __init__(self,id_1,season = '2019-20',league = '00'):
+        self.id = id_1
+        self.season = season
+        self.league = league
+    def bio_team(self):
+        from nba_api.stats.endpoints import teaminfocommon
+        team_info = teaminfocommon.TeamInfoCommon(team_id= self.id,
+                                                  league_id=self.league)
+        team_info_df = team_info.get_data_frames()[1]
+        print('Common Team Information:')
+        print(team_info_df)
+        print('\n\n\n')
+        from nba_api.stats.endpoints import teamhistoricalleaders
+        team_historical_leaders = teamhistoricalleaders.TeamHistoricalLeaders(team_id= self.id,
+                                                                              season_id = '22019',
+                                                                              league_id = self.league)
+        team_historical_leaders_df = team_historical_leaders.get_data_frames()
+        print('Team Historical Leaders: ')
+        print(team_historical_leaders_df)
+        print('\n\n\n')
+
+        from nba_api.stats.endpoints import teamdetails
+        team_details = teamdetails.TeamDetails(team_id=self.id)
+        team_details_df = team_details.get_data_frames()
+        print('Team Details: ')
+        for x in team_details_df:
+            print(x)
+            print('\n\n')
+
+    def roster_stats(self):
+        from nba_api.stats.endpoints import commonteamroster
+        common_team_roster = commonteamroster.CommonTeamRoster(team_id=self.id,
+                                                               season=self.season,
+                                                               league_id_nullable=self.league)
+        common_team_roster_df = common_team_roster.get_data_frames()
+        print('Common Team Roster: ')
+        for ros in common_team_roster_df:
+            print(ros)
+            print('\n\n')
+    def defensive_stats(self):
+        from nba_api.stats.endpoints import leaguedashptteamdefend
+        league_dash_pt_team_defend = leaguedashptteamdefend.LeagueDashPtTeamDefend(defense_category='Overall',
+                                                                                   league_id=self.league,
+                                                                                   per_mode_simple='Totals',
+                                                                                   season=self.season,
+                                                                                   season_type_all_star='Regular Season',
+                                                                                   team_id_nullable=self.id)
+        league_dash_pt_team_defend_df = league_dash_pt_team_defend.get_data_frames()
+        print('Defensive Stats')
+        print(league_dash_pt_team_defend_df)
+
+    def offensive_stats(self):
+        from nba_api.stats.endpoints import leaguedashteamptshot
+        league_dash_team_pt_shot = leaguedashteamptshot.LeagueDashTeamPtShot(league_id=self.league,
+                                                                             per_mode_simple='Totals',
+                                                                             season=self.season,
+                                                                             season_type_all_star='Regular Season',
+                                                                             team_id_nullable=self.id)
+        league_dash_team_pt_shot_df = league_dash_team_pt_shot.get_data_frames()
+        print('General Shooting')
+        print(league_dash_team_pt_shot_df)
+
+        from nba_api.stats.endpoints import teamdashptshots
+        team_dash_pt_shot = teamdashptshots.TeamDashPtShots(
+                                                            league_id=self.league,
+                                                            per_mode_simple='Totals',
+                                                            period='0',season=self.season,
+                                                            season_type_all_star='Regular Season',
+                                                            team_id=self.id)
+        team_dash_pt_shot_df = team_dash_pt_shot.get_data_frames()
+        print('Shooting Details:')
+        for shoo in team_dash_pt_shot_df:
+            print(shoo)
+            print('\n\n')
+
+class Player:
+    def __init__(self,id_player ,season = '2019-20',league = '00',team_id = id_1):
+        self.id = id_player
+        self.season = season
+        self.league = league
+        self.team_id = team_id
+    def common_player_info(self):
+        from nba_api.stats.endpoints import commonplayerinfo
+        common_player_info = commonplayerinfo.CommonPlayerInfo(player_id=self.id,
+                                                               league_id_nullable=self.league)
+        common_player_info_df = common_player_info.get_data_frames()[0:1]
+        print('Player Biography:\n ')
+        print(common_player_info_df)
+    def career_high(self):
+        from nba_api.stats.endpoints import playerprofilev2
+        player_profil_career_high = playerprofilev2.PlayerProfileV2(player_id=self.id,
+                                                                    per_mode36='Totals')
+        player_profil_career_high_df = player_profil_career_high.get_data_frames()[0]
+        print('Carrer High:\n ')
+        print(player_profil_career_high_df)
+    def player_shooting(self):
+        from nba_api.stats.endpoints import playerdashptshots
+        player_dash_pt_shots = playerdashptshots.PlayerDashPtShots(player_id=self.id,
+                                                                   league_id = self.league,
+                                                                   season = self.season,
+                                                                   team_id = self.team_id)
+        player_dash_pt_shots_df = player_dash_pt_shots.get_data_frames()
+        print('Player shooting: \n')
+        for shoo in player_dash_pt_shots_df:
+            print(shoo)
+            print('\n\n')
+    def defending_shots(self):
+        from nba_api.stats.endpoints import playerdashptshotdefend
+        player_dash_pt_shots_defend = playerdashptshotdefend.PlayerDashPtShotDefend(team_id=self.team_id,
+                                                                   player_id=self.id,
+                                                                   season=self.season,
+                                                                   league_id=self.league)
+        player_dash_pt_shots_defend_df = player_dash_pt_shots_defend.get_data_frames()
+        print('Player defending shoots: \n')
+        print(player_dash_pt_shots_defend_df)
+    def rebound(self):
+        from nba_api.stats.endpoints import playerdashptreb
+        player_dash_pt_reb = playerdashptreb.PlayerDashPtReb(team_id=self.team_id,
+                                                            player_id=self.id,
+                                                            season=self.season,
+                                                            league_id=self.league)
+        player_dash_pt_reb_df = player_dash_pt_reb.get_data_frames()[1]
+        print(player_dash_pt_reb_df)
+    def passing(self):
+        from nba_api.stats.endpoints import playerdashptpass
+        player_dash_pt_pass = playerdashptpass.PlayerDashPtPass(team_id=self.team_id,
+                                                                player_id=self.id,
+                                                                season=self.season,
+                                                                league_id=self.league)
+        player_dash_pt_pass_df = player_dash_pt_pass.get_data_frames()
+        print('Passes made and recieved:  ')
+        for pas in player_dash_pt_pass_df:
+            print(pas)
+            print('\n\n')
+
+
+#CLASS PLAYBYPLAY DA ESTADISTICAS DE PARTIDOS INDIVIDUALES TENES QUE TENER VARIABLES DE GAME_ID, ID_1 Y ID_2.me faltan agregar funciones!!
+class PlayByPlay:
+    def __init__(self, id_team = id_1, opponent_team= id_2, season='2019-20', league='00',g_id = partido):
+        self.id_team = id_team
+        self.opponent_team = opponent_team
+        self.season = season
+        self.league = league
+        self.g_id = g_id
+
+
+    def box_score_m(self):
+        from nba_api.stats.endpoints import boxscorematchups
+        box_score_m = boxscorematchups.BoxScoreMatchups(game_id = self.g_id)
+        box_score_m_df = box_score_m.get_data_frames()
+        print(box_score_m_df)
+    def box_score_defensive(self):
+        from nba_api.stats.endpoints import boxscoredefensive
+        box_score_d = boxscoredefensive.BoxScoreDefensive(game_id = self.g_id)
+        box_score_d_df = box_score_d.get_data_frames()[0]
+        print(box_score_d_df)
+    def box_score_scoring(self):
+        from nba_api.stats.endpoints import boxscorescoringv2
+        box_score_s = boxscorescoringv2.BoxScoreScoringV2(game_id = self.g_id)
+        box_score_s_df = box_score_s.get_data_frames()
+        print(box_score_s_df)
+    def box_score_summary(self):
+        from nba_api.stats.endpoints import boxscoresummaryv2
+        box_score_su = boxscoresummaryv2.BoxScoreSummaryV2(game_id = self.g_id)
+        box_score_su_df = box_score_su.get_data_frames()[5]
+        print(box_score_su_df)
+
+elegir_estadistica()
