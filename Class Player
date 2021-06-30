@@ -1,0 +1,59 @@
+class Player:
+    def __init__(self,id_player ,season = '2019-20',league = '00',team_id = id_1):
+        self.id = id_player
+        self.season = season
+        self.league = league
+        self.team_id = team_id
+    def common_player_info(self):
+        from nba_api.stats.endpoints import commonplayerinfo
+        common_player_info = commonplayerinfo.CommonPlayerInfo(player_id=self.id,
+                                                               league_id_nullable=self.league)
+        common_player_info_df = common_player_info.get_data_frames()[0:1]
+        print('Player Biography:\n ')
+        print(common_player_info_df)
+    def career_high(self):
+        from nba_api.stats.endpoints import playerprofilev2
+        player_profil_career_high = playerprofilev2.PlayerProfileV2(player_id=self.id,
+                                                                    per_mode36='Totals')
+        player_profil_career_high_df = player_profil_career_high.get_data_frames()[0]
+        print('Carrer High:\n ')
+        print(player_profil_career_high_df)
+    def player_shooting(self):
+        from nba_api.stats.endpoints import playerdashptshots
+        player_dash_pt_shots = playerdashptshots.PlayerDashPtShots(player_id=self.id,
+                                                                   league_id = self.league,
+                                                                   season = self.season,
+                                                                   team_id = self.team_id)
+        player_dash_pt_shots_df = player_dash_pt_shots.get_data_frames()
+        print('Player shooting: \n')
+        for shoo in player_dash_pt_shots_df:
+            print(shoo)
+            print('\n\n')
+    def defending_shots(self):
+        from nba_api.stats.endpoints import playerdashptshotdefend
+        player_dash_pt_shots_defend = playerdashptshotdefend.PlayerDashPtShotDefend(team_id=self.team_id,
+                                                                   player_id=self.id,
+                                                                   season=self.season,
+                                                                   league_id=self.league)
+        player_dash_pt_shots_defend_df = player_dash_pt_shots_defend.get_data_frames()
+        print('Player defending shoots: \n')
+        print(player_dash_pt_shots_defend_df)
+    def rebound(self):
+        from nba_api.stats.endpoints import playerdashptreb
+        player_dash_pt_reb = playerdashptreb.PlayerDashPtReb(team_id=self.team_id,
+                                                            player_id=self.id,
+                                                            season=self.season,
+                                                            league_id=self.league)
+        player_dash_pt_reb_df = player_dash_pt_reb.get_data_frames()[1]
+        print(player_dash_pt_reb_df)
+    def passing(self):
+        from nba_api.stats.endpoints import playerdashptpass
+        player_dash_pt_pass = playerdashptpass.PlayerDashPtPass(team_id=self.team_id,
+                                                                player_id=self.id,
+                                                                season=self.season,
+                                                                league_id=self.league)
+        player_dash_pt_pass_df = player_dash_pt_pass.get_data_frames()
+        print('Passes made and recieved:  ')
+        for pas in player_dash_pt_pass_df:
+            print(pas)
+            print('\n\n')
