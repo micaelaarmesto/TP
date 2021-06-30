@@ -158,8 +158,8 @@ def elegir_estadistica():
         from nba_api.stats.endpoints import leaguegamefinder
         league_game_finder = leaguegamefinder.LeagueGameFinder(season_nullable='2019-20',
                                                                league_id_nullable='00',
-                                                               team_id_nullable='1610612738',
-                                                               vs_team_id_nullable='1610612737')
+                                                               team_id_nullable= id_1,
+                                                               vs_team_id_nullable=id_2)
         league_game_finder_df = league_game_finder.get_dict()
         games_dic = (league_game_finder_df['resultSets'])
 
