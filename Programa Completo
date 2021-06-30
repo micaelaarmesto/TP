@@ -402,3 +402,71 @@ class PlayByPlay:
         print(box_score_su_df)
 
 elegir_estadistica()
+
+#DATA FRAME
+
+import pandas as pd
+
+users = {
+    "player": ["lebron", "curry", "curry", "tatum", "ginobilli", "campazzo", "tatum","ginobilli", "curry", "lebrom", "lebron" ],
+    "team": ["lakers", "miami", "clippers", "boston", "lakers", "miami", "clippers", "boston", "miami", "boston", "miami" ]
+}
+
+frame = pd.DataFrame(users)
+frame["country"] = ["argentina", "brasil", "argentina", "chile", "uruguay", "argentina", "brasil", "peru", "argentina", "chile", "uruguay"]
+print(frame)
+
+#API PROPIA
+
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+usuarios = [
+    {"Name": "Micaela", "Team": "lakers", "Player": "lebron"},
+    {"Name": "Esteban", "Team": "golden", "Player": "curry"},
+    {"Name": "Federico", "Team": "miami", "Player": "curry"},
+    {"Name": "Federica", "Team": "boston", "Player": "tatum"},
+    {"Name": "Zoe", "Team": "lakers", "Player": "lebron"},
+    {"Name": "Mariana", "Team": "atlanta", "Player": "curry"},
+    {"Name": "Lucia", "Team": "miami", "Player": "lebron"},
+    {"Name": "Lucila", "Team": "boston", "Player": "tatum"},
+    {"Name": "Sergio", "Team": "lakers", "Player": "lebron"},
+    {"Name": "Napoleon", "Team": "detroit", "Player": "ginobilli"},
+    {"Name": "Eugenia", "Team": "houston", "Player": "morris"},
+    {"Name": "Sol", "Team": "houston", "Player": "lebron"},
+    {"Name": "Tobias", "Team": "boston", "Player": "tatum"},
+    {"Name": "Andres", "Team": "clippers", "Player": "morris"},
+    {"Name": "Marco", "Team": "clippers", "Player": "curry"},
+    {"Name": "Ezequiel", "Team": "miami", "Player": "butler"},
+    {"Name": "Ramiro", "Team": "lakers", "Player": "lebron"},
+    {"Name": "Olivia", "Team": "boston", "Player": "tatum"},
+    {"Name": "Matias", "Team": "knicks", "Player": "randle"},
+    {"Name": "Alejo", "Team": "knicks", "Player": "curry"},
+    {"Name": "Sofia", "Team": "pelicans", "Player": "ginobilli"},
+    {"Name": "Fabiana", "Team": "miami", "Player": "campazzo"},
+    {"Name": "Florencia", "Team": "boston", "Player": "thompson"},
+    {"Name": "Juan", "Team": "lakers", "Player": "lebron"},
+    {"Name": "Maria", "Team": "boston", "Player": "ginobilli"},
+    {"Name": "Santiago", "Team": "miami", "Player": "campazzo"},
+]
+
+@app.route("/usuarios", methods=["GET"])
+def usuariosGet():
+    return jsonify({"usuarios": usuarios, "status": "ok"})
+
+@app.route('/usuarios/<equipo>', methods=['GET'])
+def busca(equipo):
+    for p in usuarios:
+       if p["Team"] == equipo:
+           return jsonify({"usuarios": usuarios[1], "busqueda": equipo, "status": "ok"})
+    return jsonify({"busqueda": equipo, "status": "not found"})
+
+
+if __name__ == "__main__":
+    app.run(debug=True, port=4000)
+
+
+
+
+
