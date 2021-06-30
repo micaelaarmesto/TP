@@ -1,0 +1,75 @@
+class Team:
+    def __init__(self,id_1,season = '2019-20',league = '00'):
+        self.id = id_1
+        self.season = season
+        self.league = league
+    def bio_team(self):
+        from nba_api.stats.endpoints import teaminfocommon
+        team_info = teaminfocommon.TeamInfoCommon(team_id= self.id,
+                                                  league_id=self.league)
+        team_info_df = team_info.get_data_frames()[1]
+        print('Common Team Information:')
+        print(team_info_df)
+        print('\n\n\n')
+        from nba_api.stats.endpoints import teamhistoricalleaders
+        team_historical_leaders = teamhistoricalleaders.TeamHistoricalLeaders(team_id= self.id,
+                                                                              season_id = '22019',
+                                                                              league_id = self.league)
+        team_historical_leaders_df = team_historical_leaders.get_data_frames()
+        print('Team Historical Leaders: ')
+        print(team_historical_leaders_df)
+        print('\n\n\n')
+
+        from nba_api.stats.endpoints import teamdetails
+        team_details = teamdetails.TeamDetails(team_id=self.id)
+        team_details_df = team_details.get_data_frames()
+        print('Team Details: ')
+        for x in team_details_df:
+            print(x)
+            print('\n\n')
+
+    def roster_stats(self):
+        from nba_api.stats.endpoints import commonteamroster
+        common_team_roster = commonteamroster.CommonTeamRoster(team_id=self.id,
+                                                               season=self.season,
+                                                               league_id_nullable=self.league)
+        common_team_roster_df = common_team_roster.get_data_frames()
+        print('Common Team Roster: ')
+        for ros in common_team_roster_df:
+            print(ros)
+            print('\n\n')
+    def defensive_stats(self):
+        from nba_api.stats.endpoints import leaguedashptteamdefend
+        league_dash_pt_team_defend = leaguedashptteamdefend.LeagueDashPtTeamDefend(defense_category='Overall',
+                                                                                   league_id=self.league,
+                                                                                   per_mode_simple='Totals',
+                                                                                   season=self.season,
+                                                                                   season_type_all_star='Regular Season',
+                                                                                   team_id_nullable=self.id)
+        league_dash_pt_team_defend_df = league_dash_pt_team_defend.get_data_frames()
+        print('Defensive Stats')
+        print(league_dash_pt_team_defend_df)
+
+    def offensive_stats(self):
+        from nba_api.stats.endpoints import leaguedashteamptshot
+        league_dash_team_pt_shot = leaguedashteamptshot.LeagueDashTeamPtShot(league_id=self.league,
+                                                                             per_mode_simple='Totals',
+                                                                             season=self.season,
+                                                                             season_type_all_star='Regular Season',
+                                                                             team_id_nullable=self.id)
+        league_dash_team_pt_shot_df = league_dash_team_pt_shot.get_data_frames()
+        print('General Shooting')
+        print(league_dash_team_pt_shot_df)
+
+        from nba_api.stats.endpoints import teamdashptshots
+        team_dash_pt_shot = teamdashptshots.TeamDashPtShots(
+                                                            league_id=self.league,
+                                                            per_mode_simple='Totals',
+                                                            period='0',season=self.season,
+                                                            season_type_all_star='Regular Season',
+                                                            team_id=self.id)
+        team_dash_pt_shot_df = team_dash_pt_shot.get_data_frames()
+        print('Shooting Details:')
+        for shoo in team_dash_pt_shot_df:
+            print(shoo)
+            print('\n\n')
