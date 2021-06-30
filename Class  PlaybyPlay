@@ -1,0 +1,29 @@
+class PlayByPlay:
+    def __init__(self, id_team = id_1, opponent_team= id_2, season='2019-20', league='00',g_id = partido):
+        self.id_team = id_team
+        self.opponent_team = opponent_team
+        self.season = season
+        self.league = league
+        self.g_id = g_id
+
+
+    def box_score_m(self):
+        from nba_api.stats.endpoints import boxscorematchups
+        box_score_m = boxscorematchups.BoxScoreMatchups(game_id = self.g_id)
+        box_score_m_df = box_score_m.get_data_frames()
+        print(box_score_m_df)
+    def box_score_defensive(self):
+        from nba_api.stats.endpoints import boxscoredefensive
+        box_score_d = boxscoredefensive.BoxScoreDefensive(game_id = self.g_id)
+        box_score_d_df = box_score_d.get_data_frames()[0]
+        print(box_score_d_df)
+    def box_score_scoring(self):
+        from nba_api.stats.endpoints import boxscorescoringv2
+        box_score_s = boxscorescoringv2.BoxScoreScoringV2(game_id = self.g_id)
+        box_score_s_df = box_score_s.get_data_frames()
+        print(box_score_s_df)
+    def box_score_summary(self):
+        from nba_api.stats.endpoints import boxscoresummaryv2
+        box_score_su = boxscoresummaryv2.BoxScoreSummaryV2(game_id = self.g_id)
+        box_score_su_df = box_score_su.get_data_frames()[5]
+        print(box_score_su_df)
