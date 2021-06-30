@@ -1,0 +1,155 @@
+def elegir_estadistica():
+    print('Choose type of stadistic you want to see:\n'
+          '1-Team\n'
+          '2-Player\n'
+          '3-PlayByPlay\n')
+    x = int(input())
+    if x == 1:
+        #ID1
+        from nba_api.stats.static import teams
+        team_x = teams.get_teams()
+        for team in team_x:
+            print(team['full_name'])
+
+        team_chosen = str(input('Please insert the team name: '))
+        database_teams_bio_select = cursor.execute("SELECT * FROM nba_teams_bio")
+        for x in database_teams_bio_select:
+            if x[1] == team_chosen:
+                global id_1
+                id_1 = x[0]
+                print(id_1)
+
+        #ELIGE LA ESTADISTICA TEAM
+        print('Choose type of team stadistic:\n'
+              '1-Biography\n'
+              '2-Roster\n'
+              '3-Defensive\n'
+              '4-Offensive\n')
+        y = int(input())
+        T1 = Team(id_1)
+        if y == 1:
+            T1.bio_team()
+        elif y == 2:
+            T1.roster_stats()
+        elif y == 3:
+            T1.defensive_stats()
+        elif y == 4:
+            T1.offensive_stats()
+
+    elif x == 2:
+        from nba_api.stats.static import teams
+        from nba_api.stats.static import players
+        team_x = teams.get_teams()
+        for team in team_x:
+            print(team['full_name'])
+
+        team_chosen = str(input('Please insert the team name: '))
+        database_teams_bio_select = cursor.execute("SELECT * FROM nba_teams_bio")
+        for x in database_teams_bio_select:
+            if x[1] == team_chosen:
+                id_1 = x[0]
+                print(id_1)
+        from nba_api.stats.endpoints import commonteamroster
+        roster = commonteamroster.CommonTeamRoster(team_id=id_1, season='2019-20', league_id_nullable='00')
+        roster_df = roster.get_data_frames()[0]
+        inividual_player = roster_df['PLAYER']
+        print(inividual_player)
+        print('Insert player name: ')
+        choosen_player_name = str(input())
+        sql_sentence_p = ("SELECT * FROM players")
+        player_sql_sentence = cursor.execute(sql_sentence_p)
+        connect.commit()
+        for p in player_sql_sentence:
+            if p[1] == choosen_player_name:
+                global player_choosen_id
+                player_choosen_id = p[0]
+                print(player_choosen_id)
+        print('Choose typer of player stadistic:\n'
+              '1-Biography\n'
+              '2-Carrer high\n'
+              '3-shooting\n'
+              '4-defending\n'
+              '5-rebound\n'
+              '6-passing\n')
+        player_stat = int(input())
+        P1 = Player(id_player=player_choosen_id)
+        if player_stat == 1:
+            P1.common_player_info()
+        if player_stat == 2:
+            P1.career_high()
+        if player_stat == 3:
+            P1.player_shooting()
+        if player_stat == 4:
+            P1.defending_shots()
+        if player_stat == 5:
+            P1.rebound()
+        if player_stat == 6:
+            P1.passing()
+
+
+
+    elif x == 3:
+        #ID1
+        from nba_api.stats.static import teams
+        team_x = teams.get_teams()
+        for team in team_x:
+            print(team['full_name'])
+
+        team_chosen = str(input('Please insert the team name: '))
+        database_teams_bio_select = cursor.execute("SELECT * FROM nba_teams_bio")
+        for x in database_teams_bio_select:
+            if x[1] == team_chosen:
+                id_1 = x[0]
+                print(id_1)
+
+        #ID2
+        team_y = teams.get_teams()
+        for team in team_y:
+            print(team['full_name'])
+
+        team_chosen_2 = str(input('Please insert the team name: '))
+        database_teams_bio_select_2 = cursor.execute("SELECT * FROM nba_teams_bio")
+        for x in database_teams_bio_select_2:
+            if x[1] == team_chosen_2:
+                global id_2
+                id_2 = x[0]
+                print(id_2)
+        #GAMEID
+        from nba_api.stats.endpoints import leaguegamefinder
+        league_game_finder = leaguegamefinder.LeagueGameFinder(season_nullable='2019-20',
+                                                               league_id_nullable='00',
+                                                               team_id_nullable='1610612738',
+                                                               vs_team_id_nullable='1610612737')
+        league_game_finder_df = league_game_finder.get_dict()
+        games_dic = (league_game_finder_df['resultSets'])
+
+        for game in games_dic:
+            # print(game)
+            each_game = game['rowSet']
+            # print(each_game)
+            for individual_game in each_game:
+                print(individual_game[0:7])
+            print('choose game, insert the date:')
+            local_game = str(input())
+            global partido
+            for x in each_game:
+                if local_game == x[5]:
+                    partido = x[4]
+                    print(partido)
+
+        # ELEGIR ESTADISTICA
+        print('Choose typer of team stadistic:\n'
+              '1-Matchup\n'
+              '2-Defensive\n'
+              '3-Scoring\n'
+              '4-Summary\n')
+        y = int(input())
+        Play_1 = PlayByPlay(id_team=id_1,opponent_team=id_2,g_id=partido)
+        if y == 1:
+            Play_1.box_score_m()
+        if y == 2:
+            Play_1.box_score_defensive()
+        if y == 3:
+            Play_1.box_score_scoring()
+        if y == 4:
+            Play_1.box_score_summary()
